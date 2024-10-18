@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="hu"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Game.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">connect4</a> &gt; <a href="index.source.html" class="el_package">com.connect4</a> &gt; <span class="el_source">Game.java</span></div><h1>Game.java</h1><pre class="source lang-java linenums">package com.connect4;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+
+/**
+ * A Game osztály kezeli a Connect4 játék logikáját.
+ */
+public class Game {
+    /** A játék tábla. */
+    private final Board board;
+
+    /** Az első játékos. */
+    private final Player player1;
+
+    /** A második játékos. */
+    private final Player player2;
+
+    /** A játékosok közötti módszer (true: ember vs ember, ember vs gép). */
+    private final boolean isHumanVsHuman;
+
+    /** A gép játékosa. */
+    private final AIPlayer aiPlayer;
+
+    /**
+     * Konstruktor a Game osztályhoz.
+     *
+     * @param rows    A sorok száma a táblán.
+     * @param columns Az oszlopok száma a táblán.
+     * @param name1   Az első játékos neve.
+     * @param name2   A második játékos neve.
+     * @param humanVsHuman A játék módja (igaz: ember vs ember, ember vs gép).
+     */
+    public Game(final int rows, final int columns, final String name1,
+<span class="fc" id="L39">                final String name2, final boolean humanVsHuman) {</span>
+<span class="fc" id="L40">        this.board = new Board(rows, columns);</span>
+<span class="fc" id="L41">        this.player1 = new Player(name1, 'X');</span>
+<span class="fc" id="L42">        this.player2 = new Player(name2, 'O');</span>
+<span class="fc" id="L43">        this.isHumanVsHuman = humanVsHuman;</span>
+
+        // AIPlayer példányosítása a helyes paraméterezéssel
+<span class="fc" id="L46">        this.aiPlayer = new AIPlayer(name2, 'O');</span>
+<span class="fc" id="L47">    }</span>
+    /**
+     * Visszaadja a játék tábláját.
+     *
+     * &lt;p&gt;Ez a metódus a {@link Board} objektumot adja vissza, amely lehetővé
+     * teszi a táblához való hozzáférést. Az öröklődő osztályok számára
+     * a {@code Board} objektumhoz való hozzáférés biztosítása érdekében
+     * gondoskodjon arról, hogy a {@code Board} objektumot ne módosítsák
+     * közvetlenül, mert ez a játék logikáját befolyásolhatja.
+     * Teszteknél használt.&lt;/p&gt;
+     *
+     * @return A játék tábla.
+     */
+    public Board getBoard() {
+<span class="fc" id="L61">        return this.board;</span>
+    }
+
+    /**
+     * Betölti a játék állását egy fájlból.
+     *
+     * @param filename A fájl neve.
+     */
+    public void loadGameFromFile(final String filename) {
+<span class="fc" id="L70">        try (BufferedReader reader = new BufferedReader(</span>
+                new FileReader(filename))) {
+            String line;
+<span class="fc bfc" id="L73" title="All 2 branches covered.">            for (int row = 0; row &lt; board.getRows(); row++) {</span>
+<span class="fc" id="L74">                line = reader.readLine();</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">                for (int col = 0; col &lt; board.getColumns(); col++) {</span>
+<span class="fc" id="L76">                    board.getGrid()[row][col] = line.charAt(col);</span>
+                }
+            }
+<span class="nc" id="L79">        } catch (IOException e) {</span>
+<span class="nc" id="L80">            System.out.println(&quot;Hiba a fájl beolvasása során: &quot;</span>
+                    +
+<span class="nc" id="L82">                    e.getMessage());</span>
+<span class="fc" id="L83">        }</span>
+<span class="fc" id="L84">    }</span>
+
+    /**
+     * Elmenti a játék állását egy fájlba.
+     *
+     * @param filename A fájl neve.
+     */
+    public void saveGameToFile(final String filename) {
+<span class="fc" id="L92">        try (BufferedWriter writer = new BufferedWriter(</span>
+                new FileWriter(filename))) {
+<span class="fc bfc" id="L94" title="All 2 branches covered.">            for (int row = 0; row &lt; board.getRows(); row++) {</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">                for (int col = 0; col &lt; board.getColumns(); col++) {</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                    writer.write(board.getGrid()[row][col] == '\0'</span>
+<span class="fc" id="L97">                            ? '.'</span>
+<span class="nc" id="L98">                            : board.getGrid()[row][col]);</span>
+                }
+<span class="fc" id="L100">                writer.newLine();</span>
+            }
+<span class="nc" id="L102">        } catch (IOException e) {</span>
+<span class="nc" id="L103">            System.out.println(&quot;Hiba a fájl mentése során: &quot;</span>
+                    +
+<span class="nc" id="L105">                    e.getMessage());</span>
+<span class="fc" id="L106">        }</span>
+<span class="fc" id="L107">    }</span>
+
+    /**
+     * Elindítja a játékot.
+     */
+    public void start() {
+<span class="fc" id="L113">        Scanner scanner = new Scanner(System.in);</span>
+<span class="fc" id="L114">        System.out.println(&quot;A játék kezdődik!&quot;);</span>
+
+        // Játékosok választása
+        while (true) {
+<span class="fc" id="L118">            board.displayBoard();</span>
+<span class="fc" id="L119">            System.out.println(player1.getName() + &quot; lépése (oszlop: 0-&quot;</span>
+<span class="fc" id="L120">                    + (board.getColumns() - 1) + &quot;):&quot;);</span>
+
+
+            // Ellenőrizni kell, hogy van-e következő bemenet
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            if (scanner.hasNextInt()) {</span>
+<span class="fc" id="L125">                int column = scanner.nextInt();</span>
+
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">                if (board.isColumnValid(column)) {</span>
+<span class="fc" id="L128">                    board.placeToken(column, player1.getToken());</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">                    if (board.checkWin()) {</span>
+<span class="fc" id="L130">                        board.displayBoard();</span>
+<span class="fc" id="L131">                        System.out.println(player1.getName() + &quot; nyert!&quot;);</span>
+<span class="fc" id="L132">                        break;</span>
+                    }
+
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">                    if (isHumanVsHuman) {</span>
+<span class="fc" id="L136">                        board.displayBoard();</span>
+<span class="fc" id="L137">                        System.out.println(player2.getName()</span>
+                                +
+                                &quot; lépése (oszlop: 0-&quot;
+<span class="fc" id="L140">                                + (board.getColumns() - 1) + &quot;):&quot;);</span>
+
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">                        if (scanner.hasNextInt()) {</span>
+<span class="fc" id="L143">                            column = scanner.nextInt();</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">                            if (board.isColumnValid(column)) {</span>
+<span class="fc" id="L145">                                board.placeToken(column, player2.getToken());</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">                                if (board.checkWin()) {</span>
+<span class="nc" id="L147">                                    board.displayBoard();</span>
+<span class="nc" id="L148">                                    System.out.println(player2.getName()</span>
+                                            + &quot; nyert!&quot;);
+<span class="nc" id="L150">                                    break;</span>
+                                }
+                            }
+                        } else {
+<span class="nc" id="L154">                            System.out.println(&quot;Nincs több bemenet a játékos &quot;</span>
+                                    + &quot;lépéséhez.&quot;);
+<span class="nc" id="L156">                            break;</span>
+                        }
+
+                    } else {
+                        // Gép lépése
+<span class="nc" id="L161">                        int aiColumn = aiPlayer.makeMove(board);</span>
+<span class="nc" id="L162">                        board.placeToken(aiColumn, aiPlayer.getToken());</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">                        if (board.checkWin()) {</span>
+<span class="nc" id="L164">                            board.displayBoard();</span>
+<span class="nc" id="L165">                            System.out.println(aiPlayer.getName()</span>
+                                    + &quot; (a gép) nyert!&quot;);
+<span class="nc" id="L167">                            break;</span>
+                        }
+<span class="nc" id="L169">                    }</span>
+
+                } else {
+<span class="nc" id="L172">                    System.out.println(&quot;Érvénytelen lépés! Próbáld újra.&quot;);</span>
+                }
+
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">                if (board.isFull()) {</span>
+<span class="nc" id="L176">                    board.displayBoard();</span>
+<span class="nc" id="L177">                    System.out.println(&quot;A játék döntetlennel zárult!&quot;);</span>
+<span class="nc" id="L178">                    break;</span>
+                }
+<span class="fc" id="L180">            } else {</span>
+<span class="fc" id="L181">                System.out.println(&quot;Nincs több bemenet a játékos lépéséhez.&quot;);</span>
+<span class="fc" id="L182">                break;</span>
+            }
+        }
+<span class="fc" id="L185">    }</span>
+
+
+    /**
+     * A program belépési pontja, amely elindítja a játékot.
+     *
+     * @param args Parancssori argumentumok.
+     */
+    public static void main(final String[] args) {
+<span class="fc" id="L194">        Scanner scanner = new Scanner(System.in);</span>
+<span class="fc" id="L195">        System.out.println(&quot;Adja meg az első játékos nevét:&quot;);</span>
+<span class="fc" id="L196">        String name1 = scanner.nextLine();</span>
+<span class="fc" id="L197">        System.out.println(&quot;Adja meg a második játékos nevét (ha gép, &quot;</span>
+                +
+                &quot;írjon 'Gép'): &quot;);
+<span class="fc" id="L200">        String name2 = scanner.nextLine();</span>
+
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">        boolean isHumanVsHuman = !name2.equalsIgnoreCase(&quot;Gép&quot;);</span>
+
+<span class="fc" id="L204">        Game game = new Game(Constants.DEFAULT_ROWS,</span>
+                Constants.DEFAULT_COLUMNS, name1, name2,
+                isHumanVsHuman);
+
+        // Fájl betöltése
+<span class="fc" id="L209">        System.out.println(&quot;Kérjük, adja meg a fájl nevét (ha nem akar &quot;</span>
+                +
+                &quot;fájlt betölteni, csak nyomjon Entert):&quot;);
+<span class="fc" id="L212">        String filename = scanner.nextLine();</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        if (!filename.isEmpty()) {</span>
+<span class="nc" id="L214">            game.loadGameFromFile(filename);</span>
+        }
+
+<span class="fc" id="L217">        game.start(); // Játék indítása</span>
+
+        // Fájl mentése
+<span class="fc" id="L220">        System.out.println(&quot;Mentse a játék állását (írd be a fájl nevét, &quot;</span>
+                +
+                &quot;ha nem akar menteni, csak nyomjon Entert):&quot;);
+<span class="fc" id="L223">        filename = scanner.nextLine();</span>
+<span class="pc bpc" id="L224" title="1 of 2 branches missed.">        if (!filename.isEmpty()) {</span>
+<span class="fc" id="L225">            game.saveGameToFile(filename);</span>
+        }
+<span class="fc" id="L227">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

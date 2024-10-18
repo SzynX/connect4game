@@ -1,2 +1,2 @@
 # connect4game
- Programozási technológiák
+ Programozás Technológiák Óra Feladat
